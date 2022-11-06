@@ -1,0 +1,32 @@
+server {
+    listen              80;
+    root {{ www_dir }};
+    server_name         {{ appsite_name }};
+    index index.php;
+#    ssl_certificate /etc/letsencrypt/live/{{ appsite_name }}/fullchain.pem; # managed by Certbot
+#    ssl_certificate_key /etc/letsencrypt/live/{{ appsite_name }}/privkey.pem; # managed by Certbot
+#    include /etc/letsencrypt/options-ssl-nginx.conf; # managed by Certbot
+#    ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem; # managed by Certbot
+
+location / {
+                try_files $uri $uri/ /index.php?$args;
+        }
+
+location ~ \.php$ {
+         include snippets/fastcgi-php.conf;
+         fastcgi_pass unix:/var/run/php/php8.1-fpm.sock;
+         fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
+         include fastcgi_params;
+}
+
+
+#    if ($host = app.kapelman.online) {
+#        return 301 https://$host$request_uri;
+#    } # managed by Certbot
+
+
+#    listen app.kapelman.online:80;
+#    server_name         app.kapelman.online;
+#    return 404; # managed by Certbot
+
+}

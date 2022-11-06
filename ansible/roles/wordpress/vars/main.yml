@@ -1,0 +1,6 @@
+---
+# vars file for wordpress
+www_dir: "/var/www/html/wordpress"
+appsite_name: "app.kapelman.online"
+cert-file: "cert.crt"
+certkey-file: "cert.crt"

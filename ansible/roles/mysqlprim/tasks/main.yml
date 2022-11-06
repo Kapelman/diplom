@@ -1,0 +1,68 @@
+---
+#- name: Install mysql-server
+#  package:
+#    name: mysql-server
+#  tags: mysql
+#- name: Install mysql-server
+#  apt: 
+#    name: mysql-server
+#    update_cache: no
+#- name: Install mysql-client
+#  apt: 
+#    name: mysql-client
+#    update_cache: no
+#- name: Install python3-pip
+#  apt: 
+#    name: python3-pip
+#    update_cache: no
+#- name: Install mysql-client
+#  package:
+#    name: mysql-client
+#  tags: mysql
+#- name: Install mysql-server
+#  shell: sudo apt install mysql-client
+#- name: Install python3-pip
+#  package:
+#    name: python3-pip
+#- name: Install python3-pip
+#  shell: sudo apt Install python3-pip
+- name: Install PyMySQL
+  pip:
+    name: PyMySQL
+- name: start up the mysql service  
+  shell: "sudo service mysql start"
+- name: new wordpress user
+  shell: sudo mysql -u root -e "CREATE USER IF NOT EXISTS '{{ mysql_wordpress_user }}'@'{{ source_server_ip }}' IDENTIFIED BY '{{ mysql_wordpress_password }}';"
+  become: true
+- name: grants for wordpress
+  shell: sudo mysql -u root -e "GRANT ALL PRIVILEGES ON wordpress.* TO '{{ mysql_wordpress_user }}'@'{{ source_server_ip }}';"
+  become: true
+#-
+- name: new wordpress user
+  shell: sudo mysql -u root -e "CREATE USER IF NOT EXISTS '{{ mysql_wordpress_user }}'@'192.168.101.14' IDENTIFIED BY '{{ mysql_wordpress_password }}';"
+  become: true
+- name: grants for wordpress
+  shell: sudo mysql -u root -e "GRANT ALL PRIVILEGES ON wordpress.* TO '{{ mysql_wordpress_user }}'@'192.168.101.14';"
+  become: true
+#-
+- name: ufw
+  shell: sudo ufw allow from {{ replica_server_ip }} to any port 3306
+- name: Set config Mysql
+  become: true
+  template:
+    src: "mysqld.j2"
+    dest: "/etc/mysql/mysql.conf.d/mysqld.cnf"
+- name: restart up the mysql service
+  shell: "sudo service mysql restart"
+- name: new user for replication
+  shell: sudo mysql -u root -e "CREATE USER IF NOT EXISTS '{{ mysql_replication_user }}'@'{{ replica_server_ip }}' IDENTIFIED BY '{{ mysql_replication_password }}';"
+  become: true
+- name: replication slave grants 
+  shell: sudo mysql -u root -e "GRANT REPLICATION SLAVE ON *.* TO '{{  mysql_replication_user }}'@'{{ replica_server_ip }}';"
+  become: true
+- name: flush PRIVILEGES;
+  shell: sudo mysql -u root -e "FLUSH PRIVILEGES;"
+  become: true
+- name: replication slave grants
+  shell: sudo mysql -u root -e "CREATE DATABASE IF NOT EXISTS {{ mysql_db }};"
+  become: true

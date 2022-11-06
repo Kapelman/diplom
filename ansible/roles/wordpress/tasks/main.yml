@@ -1,0 +1,100 @@
+---
+#new Nginx
+- name: Ensure nginx is at the latest version
+  apt:
+    name: nginx
+    force: yes
+    state: latest
+    update_cache: yes
+  become: yes
+  tags: Nginx
+#-
+- name: Create www directrory
+  shell: "sudo mkdir -p {{ www_dir }}"
+  tags: Nginx
+#-
+- name: delete default Nginx conf
+  shell: "sudo rm -f /etc/nginx/sites-enabled/defaul"
+  become: yes
+  tags: Nginx
+#-
+- name: delete default Nginx conf
+  shell: "sudo rm -f /etc/nginx/sites-available/default"
+  become: yes
+  tags: Nginx
+#-
+- name: Set config Nginx
+  become: true
+  template:
+    src: "{{ appsite_name }}.j2"
+    dest: "/etc/nginx/sites-available/{{ appsite_name }}.conf"
+  tags: Nginx
+#-
+- name: Create a symbolic link nginx for the second time
+  shell: "sudo ln -sf /etc/nginx/sites-available/{{ appsite_name }}.conf /etc/nginx/sites-enabled/{{ appsite_name }}.conf"
+  tags: Nginx
+#-
+- name: reload nginx for the second time
+  service:
+    name: nginx
+    state: reloaded
+  become: yes
+  tags: Nginx
+#- wordpress
+- name: copy WordPress
+  copy:
+    src: "latest.tar.gz"
+    dest: "/tmp/latest.tar.gz"
+  become: yes
+  tags: wordpress
+#- name: Create tmp wordpress directory
+#  file:
+#    state: directory
+#    path: "/tmp/wordpress"
+#  tags: wordpress
+- name: Extract WordPress
+  become: true
+  unarchive:
+    src: "/tmp/latest.tar.gz"
+    dest: "/{{ www_dir }}"
+    copy: false
+    extra_opts: [--strip-components=1]
+  tags: wordpress
+#- name: Move WordPress install files
+#  command: "mv -f /tmp/wordpress {{ www_dir }}"
+#  become: yes
+#  tags: wordpress
+- name: Add wp-config
+  template: "src=wp-config.j2 dest={{ www_dir }}/wp-config.php"
+  become: yes
+  tags: wordpress
+- name: Install a list of packages
+  ansible.builtin.apt:
+    pkg:
+    - ghostscript 
+    - libapache2-mod-php 
+    - php 
+    - php-bcmath 
+    - php-curl 
+    - php-imagick 
+    - php-intl 
+    - php-json 
+    - php-mbstring 
+    - php-mysql 
+    - php-xml 
+    - php-zip
+    - php-fpm
+    - php-xmlrpc
+  tags: wordpress
+- name: start nginx
+  service:
+    name: nginx
+    state: reloaded
+  become: yes
+  tags: Nginx
+- name: start nginx
+  service:
+    name: nginx
+    state: restarted
+  become: yes
+  tags: Nginx

@@ -1,0 +1,122 @@
+---
+# tasks file for nginx
+- name: Ensure nginx is at the latest version
+  apt: 
+    name: nginx
+    force: yes
+    state: latest
+    update_cache: yes
+  become: yes
+  tags: Nginx
+#-
+- name: Create www directrory
+  shell: "sudo mkdir -p {{ www_dir }}"  
+  tags: Nginx
+#-
+- name: Install snapd
+  shell: "sudo apt install snapd"
+  tags: certbot
+#-
+- name: start snapd
+  service:
+    name: snapd
+    state: started
+  become: yes
+  tags: snapd
+#-
+- name: Install certbot
+  shell: "sudo snap install --classic certbot"
+  tags: certbot
+#-
+- name: delete default Nginx conf
+  shell: "sudo rm -f /etc/nginx/sites-enabled/defaul"
+  become: yes
+  tags: Nginx
+#-
+- name: delete default Nginx conf
+  shell: "sudo rm -f /etc/nginx/sites-available/default"
+  become: yes
+  tags: Nginx
+#-
+- name: create symlink for certbot2
+  shell: "sudo ln -sf /snap/bin/certbot /usr/bin/certbot"
+  tags: certbot
+#-
+- name: Set preconfig Nginx
+  become: true
+  template:
+    src: "{{ site_name }}pre.j2"
+    dest: "/etc/nginx/sites-available/{{ site_name }}.conf"
+  tags: Nginx
+#-
+- name: Create a symbolic link nginx for the first time
+  shell: "sudo ln -sf /etc/nginx/sites-available/{{ site_name }}.conf /etc/nginx/sites-enabled/{{ site_name }}.conf"
+  tags: Nginx
+#-
+- name: reload nginx for the first time
+  service:
+    name: nginx
+    state: reloaded
+  become: yes
+  tags: Nginx
+#-
+- name: restart nginx for the first time
+  service:
+    name: nginx
+    state: restarted
+  become: yes
+  tags: Nginx
+#-
+- name: make dir for keys
+  shell: "sudo mkdir -p {{ www_dir }}/{{ site_name }}"
+  tags: cert
+#-
+#- name: Get cert
+#  shell: "sudo certbot certonly --cert-name {{ site_name }} --webroot -w {{ www_dir }}/{{ site_name }} --noninteractive --agree-tos  --email kaplin99@mail.ru -d {{ site_name }}"
+#  tags: cert
+#-
+- name: Set config Nginx
+  become: true
+  template:
+    src: "{{ site_name }}.j2"
+    dest: "/etc/nginx/sites-available/{{ site_name }}.conf"
+  tags: Nginx
+#-
+- name: Create a symbolic link nginx for the second time
+  shell: "sudo ln -sf /etc/nginx/sites-available/{{ site_name }}.conf /etc/nginx/sites-enabled/{{ site_name }}.conf"
+  tags: Nginx
+#-
+- name: Get cert
+  shell: "sudo certbot certonly --cert-name {{ site_name }} --webroot -w {{ www_dir }}/{{ site_name }} --noninteractive --agree-tos  --email kaplin99@mail.ru -d {{ site_name }} -d {{ gitlab }} -d {{ grafana }} -d {{ prometheus }} -d {{ alertmanager }}"
+  tags: cert 
+#-
+- name: stop nginx for the second time
+  service:
+    name: nginx
+    state: stopped
+  become: yes
+  tags: Nginx
+#-
+- name: reload nginx for the second time
+  service:
+    name: nginx
+    state: reloaded
+  become: yes  
+  tags: Nginx
+#-
+- name: restart nginx for the second time
+  service:
+    name: nginx
+    state: restarted
+  become: yes
+  tags: Nginx
+
+#- name: Copy cert to Nginx dir
+#  copy
+#    src: "/etc/letsencrypt/live/{{ site-name }}/"
+#    dest: /etc/
+#    remote_src: yes
+#  tag: Nginx
+#sudo certbot certonly --nginx
+#sudo certbot renew --dry-run
+#sudo certbot certonly --cert-name example.com

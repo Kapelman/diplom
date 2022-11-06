@@ -1,0 +1,184 @@
+# prometheus
+- name: copy Prometheus
+  copy:
+    src: "prometheus-2.39.1.linux-amd64.tar.gz"
+    dest: "/tmp/prometheus-2.39.1.linux-amd64.tar.gz"
+  become: yes
+  tags: prometheus
+- name: make dir
+  shell: "sudo mkdir -p {{ prometheus_dir }} /var/lib/prometheus /etc/prometheus"
+  tags: prometheus
+- name: Extract prometheus
+  become: true
+  unarchive:
+    src: "/tmp/prometheus-2.39.1.linux-amd64.tar.gz"
+    dest: "{{ prometheus_dir }}"
+    copy: false
+    extra_opts: [--strip-components=1]
+  tags: prometheus
+- name: cp prometheus promtool
+  shell: "sudo cp -n {{ prometheus_dir }}/prometheus {{ prometheus_dir }}/promtool /usr/local/bin/"
+  tags: prometheus
+- name: cp console_libraries consoles
+  shell: "sudo cp -rn {{ prometheus_dir }}/console_libraries {{ prometheus_dir }}/consoles /etc/prometheus"
+  tags: prometheus
+- name: Add prometheus config
+  template: "src=prometheus.j2 dest=/etc/prometheus/prometheus.yml"
+  become: yes
+  tags: prometheus
+- name: Add prometheus rules
+  template: "src=rules.j2 dest=/etc/prometheus/rules.yml"
+  become: yes
+  tags: prometheus
+- name: cp useradd prometheus
+  user:
+    name: prometheus
+    create_home: no
+  become: true
+  tags: prometheus
+- name: cp chown -R prometheus:prometheus
+  shell: "sudo chown -R prometheus:prometheus /etc/prometheus /var/lib/prometheus"
+  tags: prometheus
+- name: chown prometheus:prometheus
+  shell: "sudo chown prometheus:prometheus /usr/local/bin/prometheus"
+  tags: prometheus
+- name: chown prometheus:prometheus
+  shell: "sudo chown prometheus:prometheus /usr/local/bin/promtool"
+  tags: prometheus
+- name: Add prometheus.service
+  template: "src=prometheus.service.j2 dest=/etc/systemd/system/prometheus.service"
+  become: yes
+- name: daemon-reload
+  shell: "sudo systemctl daemon-reload"
+  tags: prometheus
+- name: start prometheus
+  service:
+    name: prometheus
+    state: started
+  become: yes
+  tags: prometheus
+#
+# altermanager
+#
+- name: copy alert manager
+  copy:
+    src: "alertmanager-0.24.0.linux-amd64.tar.gz"
+    dest: "/tmp/alertmanager-0.24.0.linux-amd64.tar.gz"
+  become: yes
+  tags: alertmanager
+- name: make dir
+  shell: "sudo mkdir -p {{ alertmanager_dir }}"
+  tags: alertmanager
+- name: Extract alertmanager
+  become: true
+  unarchive:
+    src: "/tmp/alertmanager-0.24.0.linux-amd64.tar.gz"
+    dest: "{{ alertmanager_dir }}"
+    copy: false
+    extra_opts: [--strip-components=1]
+  tags: altermanager
+- name: make dir
+  shell: "sudo mkdir -p /etc/alertmanager /var/lib/prometheus/alertmanager"
+  tags: altermanager
+- name: cp alertmanager amtool
+  shell: "sudo cp -n {{ alertmanager_dir }}/alertmanager {{ alertmanager_dir }}/amtool /usr/local/bin/"
+  tags: prometheus
+- name: Add prometheus config
+  template: "src=alertmanager.j2 dest=/etc/alertmanager/alertmanager.yml"
+  become: yes
+  tags: altermanager
+- name: cp useradd alertmanager
+  user:
+    name: alertmanager
+    create_home: no
+  become: true
+  tags: altermanager
+- name: chown
+  shell: "sudo chown -R alertmanager:alertmanager /etc/alertmanager /var/lib/prometheus/alertmanager"
+  tags: altermanager
+- name: chown alertmanager
+  shell: "sudo chown alertmanager:alertmanager /usr/local/bin/alertmanager"
+  tags: altermanager
+- name: chown amtool
+  shell: "sudo chown alertmanager:alertmanager /usr/local/bin/amtool"
+  tags: altermanager
+- name: Add alertmanager.service
+  template: "src=alertmanager.service.j2 dest=/etc/systemd/system/alertmanager.service"
+  become: yes
+- name: daemon-reload
+  shell: "sudo systemctl daemon-reload"
+  tags: alertmanager
+- name: start alertmanager
+  service:
+    name: alertmanager
+    state: started
+  become: yes
+  tags: altermanager
+#- grafana
+- name: copy Grafana
+  copy:
+    src: "grafana-enterprise-9.2.3.linux-amd64.tar.gz"
+    dest: "/tmp/grafana-enterprise-9.2.3.linux-amd64.tar.gz"
+  become: yes
+  tags: Grafana
+#- name: Launch Grafana
+#  shell: "sudo systemctl start grafana-server"
+#  tags: Grafana
+- name: make dir
+  shell: "sudo mkdir -p {{ grafana_dir }}"
+  tags: grafana
+- name: Extract Grafana
+  become: true
+  unarchive:
+    src: "/tmp/grafana-enterprise-9.2.3.linux-amd64.tar.gz"
+    dest: "{{ grafana_dir }}"
+    copy: false
+    extra_opts: [--strip-components=1]
+  tags: Grafana
+- name: copy grafana server
+  shell: "sudo cp -n {{ grafana_dir }}/bin/grafana-server /usr/local/bin/"
+  tags: grafana
+- name: cp useradd grafana
+  user:
+    name: grafana
+    create_home: no
+  become: true
+  tags: grafana
+- name: cp chown -R grafana:grafana
+  shell: "sudo chown -R grafana:grafana /usr/local/bin/grafana-server"
+  tags: grafana
+- name: cp chown -R grafana:grafana
+  shell: "sudo chown -R grafana:grafana /root/grafana/conf/defaults.ini"
+  tags: grafana
+- name: cp chown -R grafana:grafana
+  shell: "sudo chown -R grafana:grafana /root/grafana/"
+  tags: grafana
+- name: cp chown -R grafana:grafana
+  shell: "sudo chown -R grafana:grafana /var/log"
+  tags: grafana
+- name: Add grafana.service
+  template: "src=grafana.service.j2 dest=/etc/systemd/system/grafana-server.service"
+  become: yes
+- name: daemon-reload
+  shell: "sudo systemctl daemon-reload"
+  tags: Grafana
+- name: start Grafana
+  service:
+    name: grafana-server
+    state: started
+  become: yes
+  tags: Grafana
+
+
+
+
+
+#- name: enabled Grafana
+#  service:
+#    name: grafana-server
+#    state: enabled
+#  become: yes
+#  tags: Grafana
+#sudo systemctl start grafana-server
+#sudo systemctl status grafana-server
+#sudo systemctl enable grafana-server

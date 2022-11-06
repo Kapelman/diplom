@@ -1,0 +1,26 @@
+---
+webservers:
+  hosts:
+    kapelman.online:
+      ansible_host: 158.160.38.16
+      ansible_user: ubuntu
+dbprimary:
+  hosts:
+    db1.kapelman.online:
+      ansible_host: 158.160.32.157
+      ansible_user: ubuntu
+dbsecondary:
+  hosts:
+    db2.kapelman.online:
+      ansible_host: 158.160.37.244
+      ansible_user: ubuntu
+app:
+  hosts:
+    app.kapelman.online:
+      ansible_host: 158.160.38.212
+      ansible_user: ubuntu
+monitor:
+  hosts:
+     monitoring.kaplelman.online:
+       ansible_host: 158.160.38.231
+       ansible_user: ubuntu

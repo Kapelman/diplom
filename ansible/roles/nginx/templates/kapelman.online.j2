@@ -1,0 +1,119 @@
+upstream app {
+    server {{ app_host }}:80;
+}
+
+server {
+    listen              443 ssl;
+    root {{ www_dir }};
+    server_name         {{ site_name }};
+    ssl_certificate /etc/letsencrypt/live/{{ site_name }}/fullchain.pem; # managed by Certbot
+    ssl_certificate_key /etc/letsencrypt/live/{{ site_name }}/privkey.pem; # managed by Certbot
+#    include /etc/letsencrypt/options-ssl-nginx.conf; # managed by Certbot
+#    ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem; # managed by Certbot
+    location / {
+                        proxy_pass http://app;
+                        proxy_set_header Host $host;
+                        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+                        proxy_set_header X-Real-IP $remote_addr;
+                        proxy_redirect default;
+#                        proxy_ssl_certificate     /etc/letsencrypt/live/{{ site_name }}/fullchain.pem;
+#                        proxy_ssl_certificate_key /etc/letsencrypt/live/{{ site_name }}/privkey.pem;
+                }
+
+}
+
+#server {
+#    if ($host = kapelman.online) {
+#        return 301 https://$host$request_uri;
+#    } # managed by Certbot
+
+#server {
+#    listen kapelman.online:80;
+#    server_name         kapelman.online;
+#    return 301 https://$host$request_uri;
+#     }
+
+
+
+
+
+upstream gitlab {
+                server {{ gitlab_host }}:80;
+        }
+
+
+server {
+    listen              443 ssl;
+    root {{ www_dir }};
+    server_name         {{ gitlab }};
+    ssl_certificate /etc/letsencrypt/live/{{ site_name }}/fullchain.pem; # managed by Certbot
+    ssl_certificate_key /etc/letsencrypt/live/{{ site_name }}/privkey.pem; # managed by Certbot
+#    include /etc/letsencrypt/options-ssl-nginx.conf; # managed by Certbot
+#    ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem; # managed by Certbot
+    location / {
+                        proxy_pass http://gitlab;
+                        #proxy_ssl_certificate     /etc/letsencrypt/live/{{ site_name }}/fullchain.pem;
+                        #proxy_ssl_certificate_key /etc/letsencrypt/live/{{ site_name }}/privkey.pem;
+                }
+}
+
+
+upstream grafana {
+                server {{ grafana_host }}:3000;
+        }
+
+server {
+    listen              443 ssl;
+    root {{ www_dir }};
+    server_name         {{ grafana }};
+    ssl_certificate /etc/letsencrypt/live/{{ site_name }}/fullchain.pem; # managed by Certbot
+    ssl_certificate_key /etc/letsencrypt/live/{{ site_name }}/privkey.pem; # managed by Certbot
+#    include /etc/letsencrypt/options-ssl-nginx.conf; # managed by Certbot
+#    ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem; # managed by Certbot
+    location / {
+                        proxy_pass http://grafana;
+                        proxy_set_header Host $http_host;
+                        #proxy_ssl_certificate     /etc/letsencrypt/live/{{ site_name }}/fullchain.pem;
+                        #proxy_ssl_certificate_key /etc/letsencrypt/live/{{ site_name }}/privkey.pem;
+                }
+}
+
+upstream prometheus {
+                server {{ prometheus_host }}:9090;
+        }
+
+server {
+    listen              443 ssl;
+    root {{ www_dir }};
+    server_name         {{ prometheus }};
+    ssl_certificate /etc/letsencrypt/live/{{ site_name }}/fullchain.pem; # managed by Certbot
+    ssl_certificate_key /etc/letsencrypt/live/{{ site_name }}/privkey.pem; # managed by Certbot
+#    include /etc/letsencrypt/options-ssl-nginx.conf; # managed by Certbot
+#    ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem; # managed by Certbot
+    location / {
+                        proxy_pass http://prometheus;
+                        proxy_set_header Host $http_host;
+                        #proxy_ssl_certificate     /etc/letsencrypt/live/{{ site_name }}/fullchain.pem;
+                        #proxy_ssl_certificate_key /etc/letsencrypt/live/{{ site_name }}/privkey.pem;
+                }
+}
+
+upstream alertmanager {
+                server {{ alertmanager_host }}:9093;
+        }
+
+server {
+    listen              443 ssl;
+    root {{ www_dir }};
+    server_name         {{ alertmanager }};
+    ssl_certificate /etc/letsencrypt/live/{{ site_name }}/fullchain.pem; # managed by Certbot
+    ssl_certificate_key /etc/letsencrypt/live/{{ site_name }}/privkey.pem; # managed by Certbot
+#    include /etc/letsencrypt/options-ssl-nginx.conf; # managed by Certbot
+#    ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem; # managed by Certbot
+    location / {
+                        proxy_pass http://alertmanager;
+                        proxy_set_header Host $http_host;
+                        #proxy_ssl_certificate     /etc/letsencrypt/live/{{ site_name }}/fullchain.pem;
+                        #proxy_ssl_certificate_key /etc/letsencrypt/live/{{ site_name }}/privkey.pem;
+                }
+}

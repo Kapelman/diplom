@@ -1,0 +1,40 @@
+#- 
+- name: copy node_exporter
+  copy:
+    src: "node_exporter-1.4.0.linux-amd64.tar.gz"
+    dest: "/tmp/node_exporter-1.4.0.linux-amd64.tar.gz"
+  become: yes
+  tags: node exporter
+- name: make dir
+  shell: "sudo mkdir -p {{ node_dir }}"
+  tags: node exporter
+- name: Extract WordPress
+  become: true
+  unarchive:
+    src: "/tmp/node_exporter-1.4.0.linux-amd64.tar.gz"
+    dest: "{{ node_dir }}"
+    copy: false
+    extra_opts: [--strip-components=1]
+  tags: node exporter
+- name: copy node exporter
+  shell: "sudo cp {{ node_dir }}/node_exporter /usr/local/bin/"
+  tags: node exporter
+- name: Add prometheus config
+  template: "src=node_exporter.j2 dest=/etc/systemd/system/node_exporter.service"
+  become: yes
+  tags: node exporter
+- name: Add user nodeusr
+  shell: "sudo useradd --no-create-home --shell /bin/false nodeusr"
+  tags: node exporter
+- name: chown nodeusr:nodeusr
+  shell: "sudo chown -R nodeusr:nodeusr /usr/local/bin/node_exporter"
+  tags: node exporter
+- name: daemon-reload
+  shell: "sudo systemctl daemon-reload"
+  tags: node exporter
+- name: start node_exporter
+  service:
+    name: node_exporter
+    state: started
+  become: yes
+  tags: altermanager

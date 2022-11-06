@@ -1,0 +1,119 @@
+upstream app {
+    server {{ app_host }};
+}
+
+upstream gitlab {
+                server {{ gitlab_host }};
+        }
+
+upstream grafana {
+                server {{ grafana_host }};
+        }
+
+upstream prometheus {
+                server {{ prometheus_host }};
+        }
+
+upstream alertmanager {
+                server {{ alertmanager_host }};
+        }
+
+
+server {
+    listen              443 ssl;
+    root {{ www_dir }};
+    server_name         {{ site_name }};
+    ssl_certificate /etc/letsencrypt/live/{{ site_name }}/fullchain.pem; # managed by Certbot
+    ssl_certificate_key /etc/letsencrypt/live/{{ site_name }}/privkey.pem; # managed by Certbot
+#    include /etc/letsencrypt/options-ssl-nginx.conf; # managed by Certbot
+#    ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem; # managed by Certbot
+
+  if ($host = {{ site_name }}) {
+
+    location / {
+                        proxy_pass https://app;
+                        proxy_set_header Host $host;
+                        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+                        proxy_set_header X-Real-IP $remote_addr;
+                        proxy_redirect default;
+                        proxy_ssl_certificate     /etc/letsencrypt/live/{{ site_name }}/fullchain.pem;
+                        proxy_ssl_certificate_key /etc/letsencrypt/live/{{ site_name }}/privkey.pem;
+               }
+  }
+
+# gitlab
+  if ($host = {{ gitlab }}) {
+
+    location / {
+                        proxy_pass https://gitlab;
+                        proxy_set_header Host $host;
+                        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+                        proxy_set_header X-Real-IP $remote_addr;
+                        proxy_redirect default;
+                        proxy_ssl_certificate     /etc/letsencrypt/live/{{ site_name }}/fullchain.pem;
+                        proxy_ssl_certificate_key /etc/letsencrypt/live/{{ site_name }}/privkey.pem;
+                }
+  }
+
+# grafana
+  if ($host = {{ grafana }}) {
+
+    location / {
+                        proxy_pass https://grafana;
+                        proxy_set_header Host $host;
+                        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+                        proxy_set_header X-Real-IP $remote_addr;
+                        proxy_redirect default;
+                        proxy_ssl_certificate     /etc/letsencrypt/live/{{ site_name }}/fullchain.pem;
+                        proxy_ssl_certificate_key /etc/letsencrypt/live/{{ site_name }}/privkey.pem;
+                }
+  }
+
+# prometeus
+if ($host = {{ prometheus }}) {
+
+    location / {
+                        proxy_pass https://prometheus;
+                        proxy_set_header Host $host;
+                        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+                        proxy_set_header X-Real-IP $remote_addr;
+                        proxy_redirect default;
+                        proxy_ssl_certificate     /etc/letsencrypt/live/{{ site_name }}/fullchain.pem;
+                        proxy_ssl_certificate_key /etc/letsencrypt/live/{{ site_name }}/privkey.pem;
+                }
+  }
+
+
+}
+
+#alertmanager
+if ($host = {{ alertmanager }}) {
+
+    location / {
+                        proxy_pass https://alertmanager;
+                        proxy_set_header Host $host;
+                        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+                        proxy_set_header X-Real-IP $remote_addr;
+                        proxy_redirect default;
+                        proxy_ssl_certificate     /etc/letsencrypt/live/{{ site_name }}/fullchain.pem;
+                        proxy_ssl_certificate_key /etc/letsencrypt/live/{{ site_name }}/privkey.pem;
+                }
+  }
+
+
+
+
+#server {
+#    if ($host = kapelman.online) {
+#        return 301 https://$host$request_uri;
+#    } # managed by Certbot
+
+server {
+    listen kapelman.online:80;
+    server_name         kapelman.online;
+    return 404; # managed by Certbot
+}
+
+}
+
+#end

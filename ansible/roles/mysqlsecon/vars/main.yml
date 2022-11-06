@@ -1,0 +1,9 @@
+---
+# vars file for mysql secon
+mysql_wordpress_user: "wordpress"
+mysql_wordpress_password: "wordpress"
+mysql_replication_user: "replica"
+mysql_replication_password: "wordpress"
+replica_server_ip: "192.168.101.13"
+mysql_db: "wordpress"
+source_server_ip: "192.168.101.12"

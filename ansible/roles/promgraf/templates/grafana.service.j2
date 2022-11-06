@@ -1,0 +1,16 @@
+[Unit]
+Description=Grafana Service
+After=network.target
+
+[Service]
+User=root
+Group=root
+Type=simple
+ExecStart=/usr/local/bin/grafana-server \
+          --config /root/grafana/conf/defaults.ini             \
+          --homepath /root/grafana cfg:default.paths.logs=/var/log
+ExecReload=/bin/kill -HUP $MAINPID
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target

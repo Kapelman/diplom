@@ -1,0 +1,33 @@
+{
+  "builders": [
+    {
+      "disk_type": "network-nvme",
+      "folder_id": "b1g5fh031uiok7frafp8",
+      "name": "Ubuntu 22.04 LTS",
+      "image_family": "ubuntu-2204-lts",
+      "source_image_id": "fd8kb72eo1r5fs97a1ki",
+      "ssh_username": "ubuntu",
+      "ssh_password": "ubuntu",
+      "subnet_id": "e9bfvaoigvpijhc16kfn",
+      "token": "###################################",
+      "type": "yandex",
+      "use_ipv4_nat": true,
+      "zone": "ru-central1-a"
+    }
+  ],
+  "provisioners": [
+    {
+      "inline": [
+        "sudo apt update",
+        "sudo apt upgrade -y",
+        "sudo apt install -y openssh-server",
+        "sudo apt install -y nginx",
+        "sudo apt install -y mysql-server",
+        "sudo apt install -y mysql-client",
+        "sudo apt install -y python3-pip",
+        "sudo apt install -y snapd"
+      ],
+      "type": "shell"
+    }
+  ]
+}

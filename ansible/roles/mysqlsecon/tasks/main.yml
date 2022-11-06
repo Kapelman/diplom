@@ -1,0 +1,36 @@
+---
+- name: Install PyMySQL
+  pip:
+    name: PyMySQL
+- name: start up the mysql service  
+  shell: "sudo service mysql start"
+- name: new wordpress user
+  shell: sudo mysql -u root -e "CREATE USER IF NOT EXISTS '{{ mysql_wordpress_user }}'@'localhost' IDENTIFIED BY '{{ mysql_wordpress_password }}';"
+  become: true
+- name: grants for wordpress
+  shell: sudo mysql -u root -e "GRANT ALL PRIVILEGES ON wordpress.* TO '{{ mysql_wordpress_user }}'@'localhost';"
+  become: true
+- name: Set config Mysql
+  become: true
+  template:
+    src: "mysqld.j2"
+    dest: "/etc/mysql/mysql.conf.d/mysqld.cnf"
+- name: start up the mysql service
+  shell: "sudo service mysql restart"
+- name: change replication source to
+  shell: sudo mysql -u root -e  "CHANGE REPLICATION SOURCE TO SOURCE_HOST='{{ source_server_ip }}', SOURCE_USER='{{ mysql_replication_user }}', SOURCE_PASSWORD='{{ mysql_replication_password }}';"
+  become: true
+- name: master to master public key
+  shell: sudo mysql -u root -e  "CHANGE MASTER TO GET_MASTER_PUBLIC_KEY=1;"
+- name: change replication source to
+  shell: sudo mysql -u root -e   "START REPLICA;"
+  become: true
+- name: stop the mysql service
+  shell: "sudo service mysql stop"
+- name: remove UUID
+  shell: "sudo rm -f /var/lib/mysql/auto.cnf"
+- name: start up the mysql service
+  shell: "sudo service mysql start"
+- name: change replication source to
+  shell: sudo mysql -u root -e   "START REPLICA;"
+  become: true

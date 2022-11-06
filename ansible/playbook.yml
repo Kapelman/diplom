@@ -1,0 +1,34 @@
+- hosts: webservers
+  become: yes
+  become_user: root
+  remote_user: ubuntu 
+  roles: 
+  - nginx
+  - node
+- hosts: dbprimary
+  become: yes
+  become_user: root
+  remote_user: ubuntu
+  roles:
+  - mysqlprim
+  - node
+- hosts: dbsecondary
+  become: yes
+  become_user: root
+  remote_user: ubuntu
+  roles:
+  - mysqlsecon
+  - node
+- hosts: app
+  become: yes
+  become_user: root
+  remote_user: ubuntu
+  roles:
+  - wordpress
+  - node
+- hosts: monitor
+  become: yes
+  become_user: root
+  remote_user: ubuntu
+  roles:
+  - promgraf

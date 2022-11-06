@@ -1,0 +1,15 @@
+---
+# vars file for nginx
+site_name: "kapelman.online"
+www_dir: "/var/www/html"
+cert_file: "cert.pem"
+certkey_file: "privkey.pem"
+gitlab_host: "gitlab.{{ site_name }}"
+gitlab: "gitlab.{{ site_name }}"
+grafana_host: "monitoring.{{ site_name }}"
+grafana: "grafana.{{ site_name }}" 
+prometheus_host: "monitoring.{{ site_name }}"
+prometheus: "prometheus.{{ site_name }}"
+alertmanager: "alertmanager.{{ site_name }}"
+alertmanager_host: "monitoring.{{ site_name }}"
+app_host: "app.{{ site_name }}"

@@ -1,0 +1,3 @@
+prometheus_dir: "~/prometheus"
+alertmanager_dir: "~/alertmanager_dir"
+grafana_dir: "~/grafana"
